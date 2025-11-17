@@ -28,11 +28,11 @@ jobs:
       - name: 📦 Instalar dependências
         run: npm install
 
-      # 4️⃣ Instala dependências do Puppeteer no Ubuntu (com fallback para nomes de pacotes)
+      # 4️⃣ Instala dependências do Puppeteer no Ubuntu
       - name: 🔧 Instalar dependências do Puppeteer
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
+          sudo apt-get install -y \
             libnss3 \
             libatk1.0-0 \
             libatk-bridge2.0-0 \
@@ -43,16 +43,8 @@ jobs:
             libxdamage1 \
             libxfixes3 \
             libxrandr2 \
-            libgbm1 || true
-
-          # tentar instalar asound com nomes diferentes — alguns runners usam libasound2t64
-          if apt-cache show libasound2 >/dev/null 2>&1; then
-            sudo apt-get install -y --no-install-recommends libasound2
-          elif apt-cache show libasound2t64 >/dev/null 2>&1; then
-            sudo apt-get install -y --no-install-recommends libasound2t64
-          else
-            echo "Aviso: nenhum pacote libasound encontrado (libasound2 ou libasound2t64). Pulando."
-          fi
+            libgbm1 \
+            libasound2t64 || sudo apt-get install -y libasound2
 
       # 5️⃣ Executa o bot
       - name: 🤖 Executar bot
