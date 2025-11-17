@@ -1,0 +1,63 @@
+name: Bot Monitoramento de Preços
+
+on:
+  # Executa a cada 10 minutos
+  schedule:
+    - cron: '*/10 * * * *'
+  
+  # Permite execução manual
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1️⃣ Faz checkout do repositório
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+
+      # 2️⃣ Configura Node.js
+      - name: 🟢 Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 3️⃣ Instala as dependências
+      - name: 📦 Instalar dependências
+        run: npm install
+
+      # 4️⃣ Instala dependências do Puppeteer no Ubuntu
+      - name: 🔧 Instalar dependências do Puppeteer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 \
+            libatk1.0-0 \
+            libatk-bridge2.0-0 \
+            libcups2 \
+            libdrm2 \
+            libxkbcommon0 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxfixes3 \
+            libxrandr2 \
+            libgbm1 \
+            libasound2
+
+      # 5️⃣ Executa o bot
+      - name: 🤖 Executar bot
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SITEMAP_URL: ${{ secrets.SITEMAP_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: node monitor.js
+
+      # 6️⃣ Notifica em caso de erro
+      - name: ❌ Notificar erro
+        if: failure()
+        run: |
+          echo "❌ Bot falhou durante a execução"
+          # Aqui você pode adicionar notificação customizada se quiser
